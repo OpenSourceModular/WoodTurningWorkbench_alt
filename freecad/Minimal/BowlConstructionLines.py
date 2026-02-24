@@ -16,6 +16,7 @@
 #   Suite 330, Boston, MA  02111-1307, USA
 #
 from pathlib import Path
+from pydoc import doc
 import FreeCAD as App
 import FreeCADGui as Gui
 try:
@@ -97,9 +98,11 @@ class BowlConstructionLines:
 				layout1 = QtGui.QHBoxLayout()
 				layout1.addWidget(QtGui.QLabel("Bowl Height(mm):"))
 				self.bowl_heightBox = QtGui.QLineEdit(str(self.bowl_height))
+				self.bowl_heightBox.editingFinished.connect(lambda: self.update_text_boxes('bowl_height'))
 				layout1.addWidget(self.bowl_heightBox)
 				layout1.addWidget(QtGui.QLabel("Bowl Radius(mm):"))
 				self.bowl_radiusBox = QtGui.QLineEdit(str(self.bowl_radius))
+				self.bowl_radiusBox.editingFinished.connect(lambda: self.update_text_boxes('bowl_radius'))
 				layout1.addWidget(self.bowl_radiusBox)
 				layout.addLayout(layout1)
 
@@ -195,6 +198,27 @@ class BowlConstructionLines:
 				self.setVarsetValue("LayerHeight", self.layer_height)
 
 			def update_text_boxes(self, source):
+				if source == 'bowl_height':
+					try:
+						self.bowl_height = float(self.bowl_heightBox.text())
+						self.bowl_heightBox_in.setText(str(round(self.bowl_height / 25.4, 2)))
+						num_layers = int(self.bowl_height / self.layer_height)
+						self.num_layersBox.setText(str(num_layers))
+						layer_height = self.bowl_height / num_layers
+						self.layer_heightBox.setText(str(round(layer_height, 2)))
+						self.layer_heightBox_in.setText(str(round(layer_height / 25.4, 2)))
+					except Exception as e:
+						print(f"Error updating text boxes: {str(e)}")
+						pass
+
+				if source == 'bowl_radius':
+					try:
+						self.bowl_radius = float(self.bowl_radiusBox.text())
+						self.bowl_radiusBox_in.setText(str(round(self.bowl_radius / 25.4, 2)))
+					except Exception as e:
+						print(f"Error updating text boxes: {str(e)}")
+						pass
+
 				if source == 'layer_height':
 					try:
 						layer_height = float(self.layer_heightBox.text())
@@ -234,13 +258,15 @@ class BowlConstructionLines:
 					show_message("Error", "No active document. Please open a document first.")
 					return
 
-				sketch = doc.getObject("BowlProfileSketch")
+				a_sketch = doc.getObject("BowlProfileSketch")
+				if a_sketch is not None:
+					doc.removeObject(a_sketch.Name)
+					doc.recompute()
 
-				if sketch == None:
-					sketch = doc.addObject('Sketcher::SketchObject', 'BowlProfileSketch')
-					sketch.Placement = App.Placement(App.Vector(0, 0, 0), App.Rotation(App.Vector(1, 0, 0), 90))
-					sketch.MapMode = "Deactivated"
-					self.list_of_points = []
+				sketch = doc.addObject('Sketcher::SketchObject', 'BowlProfileSketch')
+				sketch.Placement = App.Placement(App.Vector(0, 0, 0), App.Rotation(App.Vector(1, 0, 0), 90))
+				sketch.MapMode = "Deactivated"
+				self.list_of_points = []
 
 				a_point = sketch.addGeometry(Part.Point(App.Vector(self.bowl_radius/2, 0, 0)), False)
 				self.list_of_points.append(a_point)
