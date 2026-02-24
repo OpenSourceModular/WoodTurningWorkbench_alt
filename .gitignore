@@ -1,3 +1,5 @@
 
 __pycache__/**
 .venv/**
+freecad\Minimal\__pycache__/**
+freecad\Minimal\*.pyc
