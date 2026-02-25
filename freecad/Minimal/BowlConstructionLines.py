@@ -109,7 +109,7 @@ class BowlConstructionLines:
 				layout2 = QtGui.QHBoxLayout()
 				layout2.addWidget(QtGui.QLabel("Bowl Height(in):"))
 				self.bowl_heightBox_in = QtGui.QLineEdit(str(self.bowl_height / 25.4))
-				self.bowl_heightBox_in.setReadOnly(True)
+				self.bowl_heightBox_in.editingFinished.connect(lambda: self.update_text_boxes('bowl_height_in'))
 				layout2.addWidget(self.bowl_heightBox_in)
 				layout2.addWidget(QtGui.QLabel("Bowl Radius(in):"))
 				self.bowl_radiusBox_in = QtGui.QLineEdit(str(round(self.bowl_radius / 25.4, 2)))
@@ -210,7 +210,18 @@ class BowlConstructionLines:
 					except Exception as e:
 						print(f"Error updating text boxes: {str(e)}")
 						pass
-
+				if source == 'bowl_height_in':
+					try:
+						self.bowl_height = float(self.bowl_heightBox_in.text()) * 25.4
+						self.bowl_heightBox.setText(str(round(self.bowl_height, 2)))
+						num_layers = int(self.bowl_height / self.layer_height)
+						self.num_layersBox.setText(str(num_layers))
+						layer_height = self.bowl_height / num_layers
+						self.layer_heightBox.setText(str(round(layer_height, 2)))
+						self.layer_heightBox_in.setText(str(round(layer_height / 25.4, 2)))
+					except Exception as e:
+						print(f"Error updating text boxes: {str(e)}")
+						pass
 				if source == 'bowl_radius':
 					try:
 						self.bowl_radius = float(self.bowl_radiusBox.text())

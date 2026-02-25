@@ -60,7 +60,7 @@ class OffcenterTurning:
 				self.form = QtWidgets.QWidget()
 				self.form.setWindowTitle("Offcenter Turning Task Panel")
 				#Local Variables with Default Values
-				from varsetOps import setVarsetValue, getVarsetValue, getVarsetInt
+				from .varsetOps import setVarsetValue, getVarsetValue, getVarsetInt
 				doc = App.ActiveDocument
 				if not doc.getObject("BowlVariables"):
 					self.varset = doc.addObject("App::VarSet", "BowlVariables")
